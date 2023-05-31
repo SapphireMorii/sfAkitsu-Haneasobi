@@ -91,9 +91,18 @@ void GameScreen::update(sf::Time delta)
             ball.update(delta);
         }else
         {
-            ball.setPosition(sf::Vector2f(mPaddle.getPosition().x, mPaddle.getPosition().y - 20));
-            if(ball.getElementType()!=ElementType::Frozen)
+            if(ball.isfrozen())
             {
+                // Update the freeze timer
+                ball.setFrozenTimer(ball.getFrozenTimer() - delta.asSeconds());
+                if (ball.getFrozenTimer() <= 0.f) {
+                    ball.setFrozen(false);
+                    ball.launch(sf::Vector2f(0.f, -500.f));
+                }
+                ball.move(mPaddle.getVelocity()*delta.asSeconds());
+            }else
+            {
+                ball.setPosition(sf::Vector2f(mPaddle.getPosition().x, mPaddle.getPosition().y - 20));
                 ball.setElementType(mPaddle.getElementType());
             }
         }

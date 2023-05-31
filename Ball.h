@@ -35,6 +35,12 @@ class Ball {
 
         ElementType getElementType() const;
         void setElementType(ElementType elementType);
+
+        bool isfrozen() const;
+        void setFrozen(bool frozen);
+
+        void setFrozenTimer(float time);
+        float getFrozenTimer() const;
         
     private:
         sf::CircleShape mShape;
@@ -43,6 +49,8 @@ class Ball {
         sf::Vector2f mVelocity;
         ElementType mElementType;
         bool islanuched;
+        bool isFrozen;
+        float mFrozenTimer;
         static std::map<std::pair<ElementType, ElementType>, ElementType> sElementReactions;
     };
 } 

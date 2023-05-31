@@ -85,12 +85,30 @@ bool Ball::isLaunched() const {
 
 void Ball::update(sf::Time deltaTime) {
     mShape.move(mVelocity * deltaTime.asSeconds());
-    //上左右边界反弹
-    
 }
 
 void Ball::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     target.draw(mShape, states);
+}
+
+bool Ball::isfrozen() const
+{
+    return isFrozen;
+}
+
+void Ball::setFrozen(bool frozen)
+{
+    isFrozen = frozen;
+}
+
+float Ball::getFrozenTimer() const
+{
+    return mFrozenTimer;
+}
+
+void Ball::setFrozenTimer(float frozenTimer)
+{
+    mFrozenTimer = frozenTimer;
 }
 
 ElementType Ball::getElementType() const
@@ -125,6 +143,8 @@ void Ball::setElementType(ElementType elementType)
         mShape.setFillColor(sf::Color::White);
         mShape.setOutlineThickness(0);
         islanuched = false;
+        isFrozen = true;
+        mFrozenTimer = 3.0;
         break;
     case ElementType::Superconduct:
         mShape.setFillColor(sf::Color(128, 0, 128));
