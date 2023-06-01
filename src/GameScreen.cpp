@@ -33,7 +33,12 @@ GameScreen::GameScreen() : mycurrentLevel(1){
     border.setPosition(sf::Vector2f(SCREEN_WIDTH-BORDER_WIDTH, BORDER_WIDTH));
     mBorder.push_back(border);
 
+    mComb = mMaxComb = 0;
+
     mTimer.restart();
+    mCombTimer.restart();
+
+    isGetBullet = 0;
 }
 
 void GameScreen::handleInput(sf::RenderWindow& window) {
@@ -55,8 +60,6 @@ void GameScreen::handleInput(sf::RenderWindow& window) {
 void GameScreen::update(sf::Time delta)
 {
     // Update paddle
-    //mPaddle.getVelocity.y*delta.asSeconds();
-    
     if(mPaddle.getPosition().y + mPaddle.getVelocity().y*delta.asSeconds() < SCREEN_HEIGHT - 100)
     {
         mPaddle.setVelocity(sf::Vector2f(0,0));
@@ -76,12 +79,6 @@ void GameScreen::update(sf::Time delta)
         {
             ++it;
         }
-    }
-
-    if(mBalls.empty())
-    {
-        // Game over
-        Game::Screen = std::make_shared<GameOverScreen>(mTimer.getElapsedTime().asSeconds());
     }
 
     // Update balls
@@ -130,21 +127,104 @@ void GameScreen::update(sf::Time delta)
         }
     }
 
+    //shoot the bullet
+    for(auto& bullet:mBullets)
+    {
+        if(bullet.getIsLanched())
+        {
+            bullet.update(delta);
+        }else
+        {
+            if(bullet.getLeftOrright())
+            {
+                bullet.setPosition(sf::Vector2f((mPaddle.getPosition().x)-(mPaddle.getSize().x/6),(mPaddle.getPosition().y)-(mPaddle.getSize().y/2)));
+            }else
+            {
+                bullet.setPosition(sf::Vector2f(sf::Vector2f((mPaddle.getPosition().x) + (mPaddle.getSize().x/6),(mPaddle.getPosition().y)-(mPaddle.getSize().y/2))));
+            };
+        }
+    }
+    if(mBulletTimer.getElapsedTime().asSeconds() > 0.5)
+    {
+        mBulletTimer.restart();
+        int shootcount =0;
+        for(auto& bullet:mBullets)
+        {
+            if(shootcount == 2)
+            {
+                break;
+            }
+            if(!bullet.getIsLanched())
+            {
+                shootcount++;
+                bullet.setIsLanched(true);
+            }
+        }
+    }
+    
+
+    // Check Bullet Collisions
+    for(auto& bullet : mBullets)
+    {
+        for(auto& brick : mBricks)
+        {
+            if(bullet.checkBrickCollision(brick))
+            {
+                mComb++;
+                mCombTimer.restart();
+                bullet.setIshit(true);
+            }
+        }
+    }
+
+    // Remove dead bullets
+    mBullets.erase(std::remove_if(mBullets.begin(), mBullets.end(), [](const Bullet& bullet) {
+        return bullet.getIshit();
+    }), mBullets.end());
 
     // Check ball collisions
     for (auto& ball : mBalls) {
         for (auto& brick : mBricks) {
-            ball.CheckBrickCollision(brick);
+            if(ball.CheckBrickCollision(brick))
+            {
+                mComb++;
+                mCombTimer.restart();
+            };
         }
         ball.CheckPaddleCollision(mPaddle);
     }
 
-
+    // Update the comb
+    if(mComb > mMaxComb)
+    {
+        mMaxComb = mComb;
+    }
+    if(mCombTimer.getElapsedTime().asSeconds() > 2.f)
+    {
+        mComb = 0;
+    }
 
     // Remove dead bricks
     mBricks.erase(std::remove_if(mBricks.begin(), mBricks.end(), [](const Brick& brick) {
         return brick.getHealth() <= 0;
     }), mBricks.end());
+
+    // add the bullet
+    if(mBricks.size() <= 2&&!isGetBullet)
+    {
+        Bullet bullet1(sf::Vector2f(sf::Vector2f((mPaddle.getPosition().x)-(mPaddle.getSize().x/6),(mPaddle.getPosition().y)-(mPaddle.getSize().y/2))));
+        bullet1.setLeftOrright(true);
+        Bullet bullet2(sf::Vector2f(sf::Vector2f((mPaddle.getPosition().x)+(mPaddle.getSize().x/6),(mPaddle.getPosition().y)-(mPaddle.getSize().y/2))));
+        bullet2.setLeftOrright(false);
+        for(int i=0;i<8;i++)
+        {
+            mBullets.push_back(bullet1);
+            mBullets.push_back(bullet2);
+        }
+        isGetBullet = true;
+        mBulletTimer.restart();
+    }
+
 
     // Check if all bricks are gone
     if (mBricks.empty()) {
@@ -154,12 +234,20 @@ void GameScreen::update(sf::Time delta)
             mBricks = LevelLoader::loadLevel("Levels/level" + std::to_string(mycurrentLevel) + ".txt");
             mBalls.clear();
             mBalls.push_back(Ball(mPaddle.getPosition(), mPaddle.getVelocity(), mPaddle.getElementType()));
+            mBullets.clear();
+            isGetBullet = false;
             // mTimer.restart();
         }else
         {
-            // Game over
-            Game::Screen = std::make_shared<GameSuccessScreen>(mTimer.getElapsedTime().asSeconds());
+            // Game Success
+            Game::Screen = std::make_shared<GameSuccessScreen>(mTimer.getElapsedTime().asSeconds(), mMaxComb);
         }
+    }
+
+     if(mBalls.empty())
+    {
+        // Game over
+        Game::Screen = std::make_shared<GameOverScreen>(mTimer.getElapsedTime().asSeconds(),mMaxComb);
     }       
 }
 
@@ -182,6 +270,15 @@ void GameScreen::render(sf::RenderWindow& window) {
         window.draw(border); 
     }
 
+    // Draw bullets
+    for(auto& bullet:mBullets)
+    {
+        if(bullet.getIsLanched())
+        {
+            bullet.draw(window,sf::RenderStates::Default);
+        }
+    }
+
     // Draw time
     sf::Time elapsed = mTimer.getElapsedTime();
     sf::Text timerText;
@@ -189,4 +286,11 @@ void GameScreen::render(sf::RenderWindow& window) {
     timerText.setString("Time: " + std::to_string(elapsed.asSeconds()));
     timerText.setPosition(10, 10);
     window.draw(timerText);
+
+    // Draw comb
+    sf::Text combText;
+    combText.setFont(mFont);
+    combText.setString("Comb: " + std::to_string(mComb));
+    combText.setPosition(10, 40);
+    window.draw(combText);
 }

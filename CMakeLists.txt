@@ -25,6 +25,7 @@ set(SOURCES
     src/Brick.cpp
     src/GameOverScreen.cpp
     src/GameSuccessScreen.cpp
+    src/Bullet.cpp
 )
 
 # Add header files
@@ -41,6 +42,7 @@ set(HEADERS
     Brick.h
     GameOverScreen.h
     GameSuccessScreen.h
+    Bullet.h
 )
 
 

@@ -30,6 +30,7 @@ Ball::Ball(sf::Vector2f position, sf::Vector2f velocity, ElementType elementType
     mShape.setFillColor(sf::Color::Blue);
     mVelocity = velocity;
     islanuched = false;
+    isFromBottom = false;
 }
 
 void Ball::setPosition(sf::Vector2f position) {
@@ -166,9 +167,9 @@ void Ball::setElementType(ElementType elementType)
     }
 }
 
-void Ball::CheckPaddleCollision(Paddle& paddle)
+bool Ball::CheckPaddleCollision(Paddle& paddle)
 {
-    if(getBounds().intersects(paddle.getBounds()))
+    if(getBounds().intersects(paddle.getBounds())&&!isFromBottom)
     {
         sf::FloatRect ballBounds = getBounds();
         sf::FloatRect paddleBounds = paddle.getBounds();
@@ -219,6 +220,7 @@ void Ball::CheckPaddleCollision(Paddle& paddle)
             }
             else {
                 // Collision occurred on the bottom side of the paddle
+                isFromBottom = true;
             }
         }
         if(sElementReactions.find(std::make_pair(getElementType(), paddle.getElementType())) != sElementReactions.end())
@@ -235,10 +237,13 @@ void Ball::CheckPaddleCollision(Paddle& paddle)
         {
             setElementType(paddle.getElementType());
         }
+        return true;
     }
+    isFromBottom = false;
+    return false;
 }
 
-void Ball::CheckBrickCollision(Brick& brick)
+bool Ball::CheckBrickCollision(Brick& brick)
 {
     if(getBounds().intersects(brick.getBounds()))
     {
@@ -339,5 +344,7 @@ void Ball::CheckBrickCollision(Brick& brick)
             }
 
         }
+        return true;
     }
+    return false;
 }

@@ -9,7 +9,7 @@ namespace sfAkitsu
     class GameSuccessScreen : public Screen
     {
         public:
-            GameSuccessScreen(float time);
+            GameSuccessScreen(float time,int MaxComb);
 
             void handleInput(sf::RenderWindow& window) override;
             void update(sf::Time delta) override;

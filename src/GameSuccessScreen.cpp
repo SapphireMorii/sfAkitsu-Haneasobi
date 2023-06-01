@@ -4,11 +4,13 @@
 
 using namespace sfAkitsu;
 
-GameSuccessScreen::GameSuccessScreen(float time)
+GameSuccessScreen::GameSuccessScreen(float time,int MaxComb) 
 {
     mFont.loadFromFile("Fonts/85W.ttf");
     mText.setFont(mFont);
-    mText.setString("You win! Your time was " + std::to_string(time) + " seconds."+ "\nPress Enter to return to menu\nPress Escape to quit");
+    std::string text = "You win! Your time was " + std::to_string(time) + " seconds.";
+    text+= "\nMax Comb: " + std::to_string(MaxComb) + "\nPress Enter to return to menu\nPress Escape to quit";
+    mText.setString(text);
     mText.setPosition(400 - mText.getLocalBounds().width / 2, 300 - mText.getLocalBounds().height / 2);
 }
 

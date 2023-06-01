@@ -9,7 +9,7 @@ namespace sfAkitsu
     class GameOverScreen : public Screen
     {
     public:
-        GameOverScreen(float time);
+        GameOverScreen(float time, int MaxComb);
 
         void handleInput(sf::RenderWindow& window) override;
         void update(sf::Time delta) override;

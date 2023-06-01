@@ -30,8 +30,8 @@ class Ball {
         void update(sf::Time deltaTime);
         void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-        void CheckBrickCollision(Brick& brick);
-        void CheckPaddleCollision(Paddle& paddle);
+        bool CheckBrickCollision(Brick& brick);
+        bool CheckPaddleCollision(Paddle& paddle);
 
         ElementType getElementType() const;
         void setElementType(ElementType elementType);
@@ -48,7 +48,11 @@ class Ball {
         sf::Color mColor;
         sf::Vector2f mVelocity;
         ElementType mElementType;
+
         bool islanuched;
+
+        bool isFromBottom;
+
         bool isFrozen;
         float mFrozenTimer;
         static std::map<std::pair<ElementType, ElementType>, ElementType> sElementReactions;
