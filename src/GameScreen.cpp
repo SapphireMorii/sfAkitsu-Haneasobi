@@ -154,7 +154,7 @@ void GameScreen::update(sf::Time delta)
             mBricks = LevelLoader::loadLevel("Levels/level" + std::to_string(mycurrentLevel) + ".txt");
             mBalls.clear();
             mBalls.push_back(Ball(mPaddle.getPosition(), mPaddle.getVelocity(), mPaddle.getElementType()));
-            mTimer.restart();
+            // mTimer.restart();
         }else
         {
             // Game over

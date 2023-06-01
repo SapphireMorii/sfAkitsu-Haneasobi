@@ -1,5 +1,6 @@
 #include <memory>
 
+#include "../Button.h"
 #include "../GameScreen.h"
 #include "../MenuScreen.h"
 #include "../Game.h"
@@ -10,11 +11,16 @@ MenuScreen::MenuScreen()
 {
     mFont.loadFromFile("Fonts/85W.ttf");
     mText.setFont(mFont);
-    Button startButton(mFont, "Start", sf::Vector2f(400, 300), sf::Vector2f(100, 50));
+    Button startButton(mFont, "Start", sf::Vector2f(350, 300), sf::Vector2f(100, 50));
+    Button quitButton(mFont,"Quit",sf::Vector2f(350,400),sf::Vector2f(100,50));
     startButton.setCallback([]() {
         Game::Screen = std::make_shared<GameScreen>();
     });
+    quitButton.setCallback([]() {
+        Game::Screen = nullptr;
+    });
     mButtons.push_back(startButton);
+    mButtons.push_back(quitButton);
 }
 
 void MenuScreen::handleInput(sf::RenderWindow& window)
