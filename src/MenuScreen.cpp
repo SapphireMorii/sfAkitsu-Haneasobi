@@ -4,17 +4,18 @@
 #include "../GameScreen.h"
 #include "../MenuScreen.h"
 #include "../Game.h"
+#include "../LevelSelectScreen.h"
 
 using namespace sfAkitsu;
 
 MenuScreen::MenuScreen()
 {
-    mFont.loadFromFile("Fonts/85W.ttf");
+    mFont.loadFromFile("../src/Fonts/85W.ttf");
     mText.setFont(mFont);
     Button startButton(mFont, "Start", sf::Vector2f(350, 300), sf::Vector2f(100, 50));
     Button quitButton(mFont,"Quit",sf::Vector2f(350,400),sf::Vector2f(100,50));
     startButton.setCallback([]() {
-        Game::Screen = std::make_shared<GameScreen>();
+        Game::Screen = std::make_shared<LevelSelectScreen>();
     });
     quitButton.setCallback([]() {
         Game::Screen = nullptr;
@@ -26,7 +27,9 @@ MenuScreen::MenuScreen()
 void MenuScreen::handleInput(sf::RenderWindow& window)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-    Game::Screen = std::make_shared<GameScreen>();
+    {
+        Game::Screen = std::make_shared<LevelSelectScreen>();
+    }
     for (auto& button : mButtons) {
         button.handleInput(window);
     }

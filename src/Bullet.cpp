@@ -73,9 +73,7 @@ bool Bullet::checkBrickCollision(Brick& brick)
 {
     if(getBounds().intersects(brick.getBounds()))
     {
-        printf("Brick health: %d\n", brick.getHealth());
         brick.setHealth(brick.getHealth() - 1);
-        printf("Brick health: %d\n", brick.getHealth());
         return true;
     }
     return false;

@@ -14,7 +14,7 @@ namespace sfAkitsu
     class GameScreen : public Screen
     {
     public:
-        GameScreen();
+        GameScreen(int level);
 
         void handleInput(sf::RenderWindow& window) override;
         void update(sf::Time delta) override;

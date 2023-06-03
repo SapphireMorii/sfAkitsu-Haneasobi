@@ -11,33 +11,34 @@
 
 using namespace sfAkitsu;
 
-GameScreen::GameScreen() : mycurrentLevel(1){
+GameScreen::GameScreen(int level) : mycurrentLevel(level){
     // Load font
-    mFont.loadFromFile("Fonts/85W.ttf");
+    mFont.loadFromFile("../src/Fonts/85W.ttf");
     levelcount = 2;
     // Load level
-    mBricks = LevelLoader::loadLevel("Levels/level" + std::to_string(mycurrentLevel) + ".txt");
+    mBricks = LevelLoader::loadLevel("../src/Levels/level" + std::to_string(mycurrentLevel) + ".txt");
     mPaddle = Paddle();
     sf::Vector2f ballinitialposition = sf::Vector2f(mPaddle.getPosition().x, mPaddle.getPosition().y - 20);
     mBalls.push_back(Ball(ballinitialposition,mPaddle.getVelocity(),mPaddle.getElementType()));
-     // Create the border
+    // Create the border
     sf::RectangleShape border(sf::Vector2f(SCREEN_WIDTH , BORDER_WIDTH));
+    //top
     border.setPosition(sf::Vector2f(0,BORDER_WIDTH));
     border.setFillColor(sf::Color(139, 69, 19)); // Brown color
     mBorder.push_back(border);
-
+    //left
     border.setSize(sf::Vector2f(BORDER_WIDTH, SCREEN_HEIGHT - BORDER_WIDTH));
     border.setPosition(sf::Vector2f(0, BORDER_WIDTH));
     mBorder.push_back(border);
-
+    //right
     border.setPosition(sf::Vector2f(SCREEN_WIDTH-BORDER_WIDTH, BORDER_WIDTH));
     mBorder.push_back(border);
-
+    //init the comb
     mComb = mMaxComb = 0;
-
+    //init the timer
     mTimer.restart();
     mCombTimer.restart();
-
+    // init the bullet
     isGetBullet = 0;
 }
 
@@ -228,20 +229,8 @@ void GameScreen::update(sf::Time delta)
 
     // Check if all bricks are gone
     if (mBricks.empty()) {
-        // Load next level
-        if (mycurrentLevel < levelcount) {
-            mycurrentLevel++;
-            mBricks = LevelLoader::loadLevel("Levels/level" + std::to_string(mycurrentLevel) + ".txt");
-            mBalls.clear();
-            mBalls.push_back(Ball(mPaddle.getPosition(), mPaddle.getVelocity(), mPaddle.getElementType()));
-            mBullets.clear();
-            isGetBullet = false;
-            // mTimer.restart();
-        }else
-        {
-            // Game Success
-            Game::Screen = std::make_shared<GameSuccessScreen>(mTimer.getElapsedTime().asSeconds(), mMaxComb);
-        }
+        // Game Success
+        Game::Screen = std::make_shared<GameSuccessScreen>(mTimer.getElapsedTime().asSeconds(), mMaxComb);
     }
 
      if(mBalls.empty())

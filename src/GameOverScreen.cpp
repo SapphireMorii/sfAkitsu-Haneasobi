@@ -8,7 +8,7 @@ GameOverScreen::GameOverScreen(float time,int MaxComb) :
     mFont(),
     mText()
 {
-    if (!mFont.loadFromFile("Fonts/85W.ttf"))
+    if (!mFont.loadFromFile("../src/Fonts/85W.ttf"))
     {
         // Error loading font
         printf("GameOverScreen: Error loading font\n");

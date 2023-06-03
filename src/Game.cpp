@@ -6,14 +6,13 @@
 
 using namespace sfAkitsu;
 
-const sf::Time Game::TimePerFrame_ = sf::seconds(1.f/120.f);
+const sf::Time Game::TimePerFrame_ = sf::seconds(1.f/60.f);
 
 std::shared_ptr<Screen> Game::Screen = std::make_shared<MenuScreen>();
 
 Game::Game():
     mWindow(sf::VideoMode(800,600),"Akitsu Haneasobi")
 {
-    // Set the window background color to white
     mWindow.clear();
 }
 

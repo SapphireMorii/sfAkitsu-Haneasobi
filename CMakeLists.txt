@@ -26,6 +26,7 @@ set(SOURCES
     src/GameOverScreen.cpp
     src/GameSuccessScreen.cpp
     src/Bullet.cpp
+    src/LevelSelectScreen.cpp
 )
 
 # Add header files
@@ -43,6 +44,7 @@ set(HEADERS
     GameOverScreen.h
     GameSuccessScreen.h
     Bullet.h
+    LevelSelectScreen.h
 )
 
 
