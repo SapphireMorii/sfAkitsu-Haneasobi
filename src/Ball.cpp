@@ -1,6 +1,7 @@
 #include "../Ball.h"
 #include "../ElementType.h"
 #include <math.h>
+#include <random>
 
 using namespace sfAkitsu;
 
@@ -23,11 +24,11 @@ std::map<std::pair<ElementType, ElementType>, ElementType> Ball::sElementReactio
     { {ElementType::Electro, ElementType::Electro}, ElementType::Electro},
 };
 
-Ball::Ball(sf::Vector2f position, sf::Vector2f velocity, ElementType elementType) : mElementType(elementType) {
+Ball::Ball(sf::Vector2f position, sf::Vector2f velocity, ElementType elementType) {
     mShape.setPosition(position);
     mShape.setRadius(10.0f);
     mShape.setOrigin(mShape.getRadius(), mShape.getRadius());
-    mShape.setFillColor(sf::Color::Blue);
+    setElementType(elementType);
     mVelocity = velocity;
     islanuched = false;
     isFromBottom = false;
@@ -40,7 +41,7 @@ void Ball::setPosition(sf::Vector2f position) {
 void Ball::setVelocity(sf::Vector2f velocity) {
     mVelocity = velocity;
     if(getSpeed()>2000)
-        mVelocity = mVelocity / (getSpeed()/1000);
+        mVelocity = mVelocity / (getSpeed()/2000);
 }
 
 void Ball::setRadius(float radius) {
@@ -237,6 +238,16 @@ bool Ball::CheckPaddleCollision(Paddle& paddle)
         {
             setElementType(paddle.getElementType());
         }
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dis(-0.5,0.5);
+        float random = dis(gen);
+        //速度顺时针旋转random度
+        float x = getVelocity().x;
+        float y = getVelocity().y;
+        float newx = x * cos(random) - y * sin(random);
+        float newy = x * sin(random) + y * cos(random);
+        setVelocity(sf::Vector2f(newx, newy));
         return true;
     }
     isFromBottom = false;
@@ -268,18 +279,18 @@ bool Ball::CheckBrickCollision(Brick& brick)
         {
             brick.setHealth(brick.getHealth() - 2);
             brick.setElementType(ElementType::Superconduct);
+            setElementType(ElementType::Superconduct);
         }else if(reactionelement == ElementType::Overload)
         {
             brick.setHealth(brick.getHealth() - 2);
             brick.setElementType(ElementType::Overload);
         }else if(reactionelement == ElementType::ElectroCharged)
         {
-            brick.setHealth(brick.getHealth() - 2);
+            brick.setHealth(brick.getHealth() - 1);
             brick.setElementType(ElementType::ElectroCharged);
         }else if(reactionelement == ElementType::Vaporize)
         {
             brick.setHealth(brick.getHealth() - 2);
-            brick.setElementType(ElementType::Vaporize);
         }else if(reactionelement == ElementType::Melt)
         {
             brick.setHealth(brick.getHealth() - 2);
@@ -344,6 +355,16 @@ bool Ball::CheckBrickCollision(Brick& brick)
             }
 
         }
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dis(-0.5,0.5);
+        float random = dis(gen);
+        //速度顺时针旋转random度
+        float x = getVelocity().x;
+        float y = getVelocity().y;
+        float newx = x * cos(random) - y * sin(random);
+        float newy = x * sin(random) + y * cos(random);
+        setVelocity(sf::Vector2f(newx, newy));
         return true;
     }
     return false;

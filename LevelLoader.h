@@ -3,12 +3,13 @@
 #include <vector>
 #include <string>
 #include "Brick.h"
+#include <map>
 
 
 namespace sfAkitsu {
     class LevelLoader {
     public:
-        static std::vector<Brick> loadLevel(const std::string& filename);
+        static void loadLevel(const std::string& filename,std::vector<Brick> &bricks);
     };
 }
 

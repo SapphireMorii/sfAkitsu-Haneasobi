@@ -5,13 +5,12 @@
 
 using namespace sfAkitsu;
 
-std::vector<Brick> LevelLoader::loadLevel(const std::string& filename) {
-    std::vector<Brick> bricks;
+void LevelLoader::loadLevel(const std::string& filename,std::vector<Brick> &bricks) {
 
     std::ifstream file(filename);
     if (!file.is_open()) {
         // Error opening file
-        return bricks;
+        return;
     }
     std::string line;
     while (std::getline(file, line)) {
@@ -26,5 +25,4 @@ std::vector<Brick> LevelLoader::loadLevel(const std::string& filename) {
         Brick brick(position, static_cast<ElementType>(element_type));
         bricks.push_back(brick);
     }
-    return bricks;
 }

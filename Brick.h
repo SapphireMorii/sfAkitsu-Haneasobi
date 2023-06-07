@@ -23,6 +23,7 @@ namespace sfAkitsu
 
         ElementType getElementType() const;
         void setElementType(ElementType elementType);
+        ElementType getOriginElementType() const;
 
         int getHealth() const;
         void setHealth(int health);
@@ -30,6 +31,9 @@ namespace sfAkitsu
         sf::RectangleShape mShape;
         sf::Vector2f mpPosition;
         ElementType mElementType;
+        ElementType originElementType;
         int mHealth;
+        int mMoveWay;
+        std::vector<sf::Vector2f> mMoveWayList;
     };
 }

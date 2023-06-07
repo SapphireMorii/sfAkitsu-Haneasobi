@@ -4,6 +4,8 @@
 #include "../GameOverScreen.h"
 #include "../Game.h"
 #include "../GameSuccessScreen.h"
+#include "../MenuScreen.h"
+#include <random>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -11,13 +13,12 @@
 
 using namespace sfAkitsu;
 
-GameScreen::GameScreen(int level) : mycurrentLevel(level){
+GameScreen::GameScreen(int level,int selectbuff) : mycurrentLevel(level),buff(selectbuff),mPaddle(selectbuff){
     // Load font
     mFont.loadFromFile("../src/Fonts/85W.ttf");
     levelcount = 2;
     // Load level
-    mBricks = LevelLoader::loadLevel("../src/Levels/level" + std::to_string(mycurrentLevel) + ".txt");
-    mPaddle = Paddle();
+    LevelLoader::loadLevel("../src/Levels/level" + std::to_string(mycurrentLevel) + ".txt",mBricks);
     sf::Vector2f ballinitialposition = sf::Vector2f(mPaddle.getPosition().x, mPaddle.getPosition().y - 20);
     mBalls.push_back(Ball(ballinitialposition,mPaddle.getVelocity(),mPaddle.getElementType()));
     // Create the border
@@ -33,6 +34,10 @@ GameScreen::GameScreen(int level) : mycurrentLevel(level){
     //right
     border.setPosition(sf::Vector2f(SCREEN_WIDTH-BORDER_WIDTH, BORDER_WIDTH));
     mBorder.push_back(border);
+    //bottom
+    border.setSize(sf::Vector2f(SCREEN_WIDTH-2*BORDER_WIDTH, BORDER_WIDTH));
+    border.setPosition(sf::Vector2f(BORDER_WIDTH, SCREEN_HEIGHT-BORDER_WIDTH));
+    mBorder.push_back(border);
     //init the comb
     mComb = mMaxComb = 0;
     //init the timer
@@ -40,12 +45,17 @@ GameScreen::GameScreen(int level) : mycurrentLevel(level){
     mCombTimer.restart();
     // init the bullet
     isGetBullet = 0;
+    // init the buffcomb
+    combforbuff = 1;
+    buff1 = 0;
+    buff2 = 0;
+    wall = 0;
 }
 
 void GameScreen::handleInput(sf::RenderWindow& window) {
     mPaddle.handleInput();
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-		window.close();
+		Game::Screen = std::make_shared<MenuScreen>();
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
     {
         for(auto& ball : mBalls)
@@ -61,15 +71,20 @@ void GameScreen::handleInput(sf::RenderWindow& window) {
 void GameScreen::update(sf::Time delta)
 {
     // Update paddle
-    if(mPaddle.getPosition().y + mPaddle.getVelocity().y*delta.asSeconds() < SCREEN_HEIGHT - 100)
+    if(mPaddle.getPosition().y + mPaddle.getVelocity().y*delta.asSeconds() < SCREEN_HEIGHT - 150)
     {
         mPaddle.setVelocity(sf::Vector2f(0,0));
     }else if(mPaddle.getPosition().y + mPaddle.getVelocity().y*delta.asSeconds() > SCREEN_HEIGHT - mPaddle.getSize().y)
     {
         mPaddle.setVelocity(sf::Vector2f(0,0));
+    }else if(mPaddle.getPosition().x + mPaddle.getVelocity().x*delta.asSeconds() < 0)
+    {
+        mPaddle.setVelocity(sf::Vector2f(0,0));
+    }else if(mPaddle.getPosition().x + mPaddle.getVelocity().x*delta.asSeconds() > SCREEN_WIDTH)
+    {
+        mPaddle.setVelocity(sf::Vector2f(0,0));
     }
     mPaddle.update(delta);
-
     // Check if the paddle is out of the screen
     for(auto it = mBalls.begin(); it != mBalls.end();)
     {
@@ -124,6 +139,12 @@ void GameScreen::update(sf::Time delta)
         if (ballPosition.y - ballRadius < BORDER_WIDTH) {
             // Ball hit the top wall
             ball.setPosition(sf::Vector2f(ballPosition.x, BORDER_WIDTH + ballRadius));
+            ball.setVelocity(sf::Vector2f(ball.getVelocity().x, -ball.getVelocity().y));
+        }
+        if(ballPosition.y + ballRadius > SCREEN_HEIGHT + BORDER_WIDTH && wall)
+        {
+            // Ball hit the bottom wall
+            ball.setPosition(sf::Vector2f(ballPosition.x, SCREEN_HEIGHT + BORDER_WIDTH - ballRadius));
             ball.setVelocity(sf::Vector2f(ball.getVelocity().x, -ball.getVelocity().y));
         }
     }
@@ -190,18 +211,134 @@ void GameScreen::update(sf::Time delta)
             {
                 mComb++;
                 mCombTimer.restart();
+                if(buff1)
+                {
+                    buff1 = 0;
+                    //生成随机数
+                    std::random_device rd;
+                    std::mt19937 gen(rd());
+                    std::uniform_real_distribution<float> dis(-5,5);
+                    float random = dis(gen);
+                    //速度顺时针旋转random度
+                    float x = ball.getVelocity().x;
+                    float y = ball.getVelocity().y;
+                    float newx = x * cos(random) - y * sin(random);
+                    float newy = x * sin(random) + y * cos(random);
+                    sf::Vector2f newVelocity(newx,newy);
+                    Ball newBall = Ball(ball.getPosition(),newVelocity,ball.getElementType());
+                    newBall.launch(newVelocity);
+                    mBalls.push_back(newBall);
+                }
             };
         }
         ball.CheckPaddleCollision(mPaddle);
+    }
+    
+    for(auto& brick:mBricks)
+    {
+        if(brick.getElementType() == ElementType::ElectroCharged)
+        {
+            for(auto& brick2:mBricks)
+            {
+                float distance = sqrt(pow(brick.getPosition().x - brick2.getPosition().x,2) + pow(brick.getPosition().y - brick2.getPosition().y,2));\
+                if(distance <= 51&&brick.getPosition()!=brick2.getPosition())
+                {
+                    brick2.setHealth(brick2.getHealth()-1);
+                    if(brick2.getHealth()>=0)
+                    {
+                        mComb++;
+                        mCombTimer.restart(); 
+                    }
+                    if(brick2.getElementType()==brick.getOriginElementType())
+                    {
+                        brick2.setElementType(ElementType::ElectroCharged);
+                    }
+                }
+            }
+            brick.setElementType(brick.getOriginElementType());
+        }
+        if(brick.getElementType()==ElementType::Overload)
+        {
+            for(auto&brick2:mBricks)
+            {
+                float distance = sqrt(pow(brick.getPosition().x - brick2.getPosition().x,2) + pow(brick.getPosition().y - brick2.getPosition().y,2));
+                if(distance <= 26&&brick.getPosition()!=brick2.getPosition())
+                {
+                    brick2.setHealth(0);
+                    mComb++;
+                    mCombTimer.restart();
+                }
+            }
+        }
+        if(brick.getElementType()==ElementType::Frozen)
+        {
+            for(auto&brick2:mBricks)
+            {
+                float distance = sqrt(pow(brick.getPosition().x - brick2.getPosition().x,2) + pow(brick.getPosition().y - brick2.getPosition().y,2));
+                if(distance <= 26&&brick.getPosition()!=brick2.getPosition()&&brick2.getElementType()!=ElementType::Frozen&&brick2.getElementType()==brick.getOriginElementType())
+                {
+                    brick2.setHealth(1);
+                    brick2.setElementType(ElementType::Frozen);
+                    mComb++;
+                    mCombTimer.restart();
+                }
+            }
+        }
+    }
+
+    // Frozen 
+    for(auto &Brick:mBricks)
+    {
+        if(Brick.getHealth() <= 0 && Brick.getElementType() == ElementType::Frozen)
+        {
+            for(auto &Brick2:mBricks)
+            {
+                if(Brick2.getElementType() == ElementType::Frozen)
+                {
+                    if(Brick2.getPosition()==Brick.getPosition())
+                    {
+                        continue;
+                    }
+                    Brick2.setHealth(0);
+                    mComb++;
+                    mCombTimer.restart();
+                }
+            }
+            break;
+        }
     }
 
     // Update the comb
     if(mComb > mMaxComb)
     {
         mMaxComb = mComb;
+        if(mComb>=10*combforbuff)
+        {
+            combforbuff++;
+            if(buff == 1&&mBalls.size()<3)
+            {
+                buff1 = 1;
+            }else if(buff == 2 && buff2 < 3)
+            {
+                buff2++;
+                for(auto &ball:mBalls)
+                {
+                    ball.setVelocity(1.2f*ball.getVelocity());
+                }
+            }else if(buff == 4)
+            {
+                wall =  1;
+                wallTimer.restart();
+            }
+        }
     }
-    if(mCombTimer.getElapsedTime().asSeconds() > 2.f)
+    if(wallTimer.getElapsedTime().asSeconds() > 6.f)
     {
+        wall = 0;
+    }
+    if(mCombTimer.getElapsedTime().asSeconds() > 5.f)
+    {
+        combforbuff = 1;
         mComb = 0;
     }
 
@@ -237,7 +374,8 @@ void GameScreen::update(sf::Time delta)
     {
         // Game over
         Game::Screen = std::make_shared<GameOverScreen>(mTimer.getElapsedTime().asSeconds(),mMaxComb);
-    }       
+    }
+  
 }
 
 void GameScreen::render(sf::RenderWindow& window) {
@@ -255,8 +393,13 @@ void GameScreen::render(sf::RenderWindow& window) {
     mPaddle.draw(window, sf::RenderStates::Default);
 
     // Draw border
-    for (const auto& border : mBorder) {
-        window.draw(border); 
+    for (int i=0;i<3;i++)
+    {
+        window.draw(mBorder[i]);
+    }
+    if(wall == 1)
+    {
+        window.draw(mBorder[3]);
     }
 
     // Draw bullets

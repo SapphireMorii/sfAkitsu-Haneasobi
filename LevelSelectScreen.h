@@ -12,7 +12,9 @@ namespace sfAkitsu
         private:
         sf::Font mFont;
         sf::Text mText;
-        std::vector<Button> mButtons;
+        // std::vector<Button> mButtons;
+        Button Button1;
+        Button Button2;
         public:
         LevelSelectScreen();
 

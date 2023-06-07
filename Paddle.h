@@ -8,7 +8,7 @@ namespace sfAkitsu
 {
     class Paddle {
     public:
-        Paddle();
+        Paddle(int buff);
 
         void setPosition(sf::Vector2f position);
         void setVelocity(sf::Vector2f velocity);
@@ -32,5 +32,7 @@ namespace sfAkitsu
         sf::RectangleShape mShape;
         sf::Vector2f mVelocity;
         ElementType mElementType;
+        int mbuff;
+        sf::Clock buffTimer;
     };
 }

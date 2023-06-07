@@ -14,7 +14,7 @@ namespace sfAkitsu
     class GameScreen : public Screen
     {
     public:
-        GameScreen(int level);
+        GameScreen(int level,int buff);
 
         void handleInput(sf::RenderWindow& window) override;
         void update(sf::Time delta) override;
@@ -34,6 +34,7 @@ namespace sfAkitsu
         sf::Clock mCombTimer;
 
         std::vector<Brick> mBricks;
+
         std::vector<Ball> mBalls;
         Paddle mPaddle;
         std::vector<sf::RectangleShape> mBorder;
@@ -42,5 +43,13 @@ namespace sfAkitsu
         
         bool isGetBullet;
         sf::Clock mBulletTimer;
+
+        int buff;
+        int combforbuff;
+
+        bool buff1;
+        int buff2;
+        bool wall;
+        sf::Clock wallTimer;
     };
 } 

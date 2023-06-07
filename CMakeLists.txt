@@ -27,6 +27,7 @@ set(SOURCES
     src/GameSuccessScreen.cpp
     src/Bullet.cpp
     src/LevelSelectScreen.cpp
+    src/BuffSelectScreen.cpp
 )
 
 # Add header files
@@ -45,12 +46,15 @@ set(HEADERS
     GameSuccessScreen.h
     Bullet.h
     LevelSelectScreen.h
+    BuffSelectScreen.h
 )
 
 
 # Add executable
 add_executable(sfAkitsu ${SOURCES} ${HEADERS})
 
+# Set compiler options
+# target_compile_options(sfAkitsu PRIVATE "-Og")
 
 # Link SFML libraries
 target_link_libraries(sfAkitsu sfml-graphics sfml-window sfml-audio)
