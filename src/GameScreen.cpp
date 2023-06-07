@@ -249,7 +249,7 @@ void GameScreen::update(sf::Time delta)
                         mComb++;
                         mCombTimer.restart(); 
                     }
-                    if(brick2.getElementType()==brick.getOriginElementType())
+                    if(brick2.getElementType()==brick.getOriginElementType()&&(brick2.getElementType()==ElementType::Electro||brick2.getElementType()==ElementType::Hydro))    
                     {
                         brick2.setElementType(ElementType::ElectroCharged);
                     }
